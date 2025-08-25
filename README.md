@@ -22,7 +22,7 @@ DeepOrigin/
 │   └── products.cy.ts          # Main test suite
 ├── cypress/
 │   ├── fixtures/
-│   │   ├── environments.json   # Environment configurations (not actually used atm, example for irl behaviour)
+│   │   ├── environments.json   # Environment configurations (not actually used atm, example for irl)
 │   │   └── test-data.json      # Test data for parameterized tests
 │   └── support/
 │       ├── page-objects/
