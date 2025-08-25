@@ -3,8 +3,11 @@ const { defineConfig } = require("cypress");
 module.exports = defineConfig({
   e2e: {
     baseUrl: "https://dummyjson.com",       
-    specPattern: "features/**/*.cy.ts",     // Updated to match your test location
-    supportFile: "cypress/support/e2e.ts"  // Enable support file for custom commands
+    specPattern: "features/**/*.cy.{js,ts}",
+    supportFile: "cypress/support/e2e.ts",
+    setupNodeEvents(on, config) {
+      // implement node event listeners here if needed
+    },
   },
   video: false,                            
   screenshotOnRunFailure: true             
