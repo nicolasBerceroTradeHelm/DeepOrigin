@@ -1,6 +1,8 @@
-// cypress/e2e/products.cy.ts
+import { ProductsAPI } from '../cypress/support/page-objects/ProductsAPI';
+
 describe('DummyJSON Products API', () => {
     const api = cy.request;
+    const productsAPI = new ProductsAPI();
 
     // Tests fetching all products and validates response structure
     it('should fetch all products', () => {
@@ -145,6 +147,56 @@ describe('DummyJSON Products API', () => {
             if (sortedTitles.length > 1) {
                 expect(sortedTitles[0].localeCompare(sortedTitles[sortedTitles.length - 1])).to.be.at.least(0);
             }
+        });
+    });
+
+    describe('Performance Testing', () => {
+        // Test API response time performance and ensure it meets acceptable thresholds
+        it('should measure response times', () => {
+            const startTime = Date.now();
+
+            productsAPI.getAllProducts()
+                .then((response) => {
+                    const responseTime = Date.now() - startTime;
+                    cy.log(`Response time: ${responseTime}ms`);
+
+                    expect(responseTime).to.be.lessThan(5000);
+                    productsAPI.validateProductsListResponse(response);
+                });
+        });
+    });
+
+    describe('Contract Testing', () => {
+        // Test individual product schema contract validation
+        it('should validate product schema', () => {
+            productsAPI.getProductById(1)
+                .then((response) => {
+                    const product = response.body;
+                    expect(product).to.include.all.keys([
+                        'id', 'title', 'description', 'price', 'discountPercentage',
+                        'rating', 'stock', 'brand', 'category', 'thumbnail', 'images'
+                    ]);
+
+                    expect(product.id).to.be.a('number');
+                    expect(product.title).to.be.a('string');
+                    expect(product.price).to.be.a('number');
+                    expect(product.rating).to.be.a('number');
+                    expect(product.images).to.be.an('array');
+                });
+        });
+
+        // Test products list response structure contract validation
+        it('should validate products list schema', () => {
+            productsAPI.getAllProducts()
+                .then((response) => {
+                    const data = response.body;
+
+                    expect(data).to.have.all.keys(['products', 'total', 'skip', 'limit']);
+                    expect(data.products).to.be.an('array');
+                    expect(data.total).to.be.a('number').and.be.at.least(0);
+                    expect(data.skip).to.be.a('number').and.be.at.least(0);
+                    expect(data.limit).to.be.a('number').and.be.at.least(1);
+                });
         });
     });
 });

@@ -1,41 +1,20 @@
-{
+﻿{
   "compilerOptions": {
-    // Environment Settings
-    "module": "esnext",
-    "target": "es2017",
+    "target": "es5",
+    "lib": ["es5", "dom"],
+    "types": ["cypress"],
     "moduleResolution": "node",
-    "types": ["cypress", "node"],
-    "lib": ["es2017", "dom"],
-
-    // Other Outputs
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
-
-    // Stricter Typechecking Options
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-
-    // Style Options
-    "strict": true,
+    "allowJs": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "strict": false,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-
-    // Path Options
-    "resolveJsonModule": true
-    // "noUnusedParameters": true,
-    // "noFallthroughCasesInSwitch": true,
-    // "noPropertyAccessFromIndexSignature": true,
-
-    // Recommended Options
-    "strict": true,
-    "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
-    "isolatedModules": true,
-    "noUncheckedSideEffectImports": true,
-    "moduleDetection": "force",
-    "skipLibCheck": true,
-  }
+    "forceConsistentCasingInFileNames": false
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
