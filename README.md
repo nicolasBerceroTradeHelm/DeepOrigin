@@ -1,6 +1,7 @@
 # DeepOrigin Cypress API Testing Suite
 
 A comprehensive TypeScript-based Cypress testing suite for API testing using the DummyJSON Products API. This project demonstrates modern API testing patterns including parameterization, maintainability, and advanced testing concepts.
+Autor: Nicolas Bercero
 
 ## 🚀 Features
 
