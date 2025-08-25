@@ -28,6 +28,14 @@ export class ProductsAPI {
         });
     }
 
+    getProductsSorted(sortBy: string, order: 'asc' | 'desc') {
+        return cy.request({
+            method: 'GET',
+            url: `${this.baseUrl}/products`,
+            qs: { sortBy, order }
+        });
+    }
+
     addProduct(product: any) {
         return cy.request({
             method: 'POST',
