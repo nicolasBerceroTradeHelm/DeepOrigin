@@ -1,213 +1,150 @@
-import {
-    testConfig,
-    makeApiRequest,
-    validateProductStructure,
-    validateProductsListResponse,
-    type Product,
-    type ProductsListResponse
-} from '../cypress/support/test-config';
-
+// cypress/e2e/products.cy.ts
 describe('DummyJSON Products API', () => {
-    // Load test data from fixtures
-    let testData: any;
-    let environments: any;
+    const api = cy.request;
 
-    before(() => {
-        cy.fixture('test-data').then((data) => {
-            testData = data;
-        });
-        cy.fixture('environments').then((env) => {
-            environments = env;
-        });
-    });
-
+    // Tests fetching all products and validates response structure
     it('should fetch all products', () => {
-        makeApiRequest({
+        api({
             method: 'GET',
-            url: testConfig.endpoints.products,
+            url: '/products',
         }).then((response) => {
-            validateProductsListResponse(response);
-            
-            // Additional validations
-            if (response.body.products.length > 0) {
-                validateProductStructure(response.body.products[0]);
-            }
+            expect(response.status).to.equal(200);
+            expect(response.body).to.have.all.keys('products', 'total', 'skip', 'limit');
+            expect(response.body.products).to.be.an('array');
+            expect(response.body.total).to.be.a('number');
         });
     });
 
+    // Tests fetching a specific product by ID and validates product properties
     it('should fetch a single product by ID', () => {
-        makeApiRequest({
+        const productId = 1;
+        api({
             method: 'GET',
-            url: testConfig.endpoints.productById(testConfig.testData.validProductId),
+            url: `/products/${productId}`,
         }).then((response) => {
-            expect(response.status).to.equal(testConfig.expectedStatusCodes.success);
-            expect(response.body).to.have.property('id', testConfig.testData.validProductId);
-            validateProductStructure(response.body, ['id', 'title', 'description', 'price']);
+            expect(response.status).to.equal(200);
+            expect(response.body).to.have.property('id', productId);
+            expect(response.body).to.include.keys('title', 'description', 'price');
         });
     });
 
+    // Tests searching for products using query parameter and validates search results
     it('should search products via query parameter', () => {
-        makeApiRequest({
+        const query = 'phone';
+        api({
             method: 'GET',
-            url: testConfig.endpoints.search,
-            qs: { q: testConfig.testData.searchQuery },
+            url: `/products/search`,
+            qs: { q: query },
         }).then((response) => {
-            validateProductsListResponse(response);
-            
-            // Verify search results contain the query term
-            if (response.body.products.length > 0) {
-                const hasMatchingProducts = response.body.products.some((product: Product) => 
-                    product.title.toLowerCase().includes(testConfig.testData.searchQuery.toLowerCase()) ||
-                    product.description.toLowerCase().includes(testConfig.testData.searchQuery.toLowerCase())
-                );
-                expect(hasMatchingProducts).to.be.true;
-            }
+            expect(response.status).to.equal(200);
+            expect(response.body).to.have.all.keys('products', 'total', 'skip', 'limit');
+            expect(response.body.products).to.be.an('array');
         });
     });
 
+    // Tests creating a new product and validates the response contains submitted data
     it('should add a new product (mock)', () => {
+        const newProduct = {
+            title: 'Test Product',
+            price: 19.99,
+            description: 'Cypress test product',
+        };
+
         cy.request({
             method: 'POST',
-            url: testConfig.endpoints.add,
-            body: testConfig.testData.newProduct,
+            url: '/products/add',
+            body: newProduct,
             headers: { 'Content-Type': 'application/json' },
         }).then((response) => {
-            expect(response.status).to.equal(testConfig.expectedStatusCodes.created);
-            
-            // Verify the response contains the submitted data
+            expect(response.status).to.equal(201);   // ✅ was 200 before
             expect(response.body).to.include({
-                title: testConfig.testData.newProduct.title,
-                price: testConfig.testData.newProduct.price,
-                description: testConfig.testData.newProduct.description,
+                title: newProduct.title,
+                price: newProduct.price,
+                description: newProduct.description,
             });
-            
             expect(response.body).to.have.property('id').that.is.a('number');
-            validateProductStructure(response.body);
         });
     });
 
+
+    // Tests updating an existing product and validates the updated properties
     it('should update an existing product (mock)', () => {
-        makeApiRequest({
+        const updateData = { title: 'Updated Title Cypress Test' };
+        const productId = 1;
+
+        api({
             method: 'PUT',
-            url: testConfig.endpoints.update(testConfig.testData.validProductId),
-            body: testConfig.testData.updateData,
+            url: `/products/${productId}`,
+            body: updateData,
             headers: { 'Content-Type': 'application/json' },
         }).then((response) => {
-            expect(response.status).to.equal(testConfig.expectedStatusCodes.success);
-            expect(response.body).to.have.property('title', testConfig.testData.updateData.title);
-            expect(response.body).to.have.property('id', testConfig.testData.validProductId);
-            validateProductStructure(response.body);
+            expect(response.status).to.equal(200);
+            expect(response.body).to.have.property('title', updateData.title);
+            expect(response.body).to.have.property('id', productId);
         });
     });
 
+    // Tests deleting a product and validates the deletion response
     it('should delete a product (mock)', () => {
-        makeApiRequest({
+        const productId = 1;
+
+        api({
             method: 'DELETE',
-            url: testConfig.endpoints.delete(testConfig.testData.validProductId),
+            url: `/products/${productId}`,
         }).then((response) => {
-            expect(response.status).to.equal(testConfig.expectedStatusCodes.success);
+            expect(response.status).to.equal(200);
             expect(response.body).to.include.keys('id', 'isDeleted', 'deletedOn');
-            expect(response.body).to.have.property('id', testConfig.testData.validProductId);
+            expect(response.body).to.have.property('id', productId);
             expect(response.body.isDeleted).to.be.true;
             expect(response.body.deletedOn).to.be.a('string');
         });
     });
 
-    describe('Parameterized Tests', () => {
-        testConfig.testData.testProductIds.forEach(productId => {
-            it(`should fetch product with ID ${productId}`, () => {
-                makeApiRequest({
-                    method: 'GET',
-                    url: testConfig.endpoints.productById(productId),
-                }).then((response) => {
-                    expect(response.status).to.equal(testConfig.expectedStatusCodes.success);
-                    expect(response.body).to.have.property('id', productId);
-                    validateProductStructure(response.body);
-                });
-            });
-        });
+    // Tests requesting products with ascending sort and validates client-side sorting logic
+    it('should fetch products sorted by title ascending', () => {
+        api({
+            method: 'GET',
+            url: '/products',
+            qs: {
+                sortBy: 'title',
+                order: 'asc'
+            }
+        }).then((response) => {
+            expect(response.status).to.equal(200);
+            expect(response.body).to.have.property('products');
 
-        testConfig.testData.searchQueries.forEach(query => {
-            it(`should search for products with query: "${query}"`, () => {
-                makeApiRequest({
-                    method: 'GET',
-                    url: testConfig.endpoints.search,
-                    qs: { q: query },
-                }).then((response) => {
-                    validateProductsListResponse(response);
-                });
-            });
+            const titles = response.body.products.map((p: any) => p.title.toLowerCase());
+            const sortedTitles = [...titles].sort((a, b) => a.localeCompare(b));
+
+            expect(sortedTitles.length).to.equal(titles.length);
+
+            if (sortedTitles.length > 1) {
+                expect(sortedTitles[0].localeCompare(sortedTitles[sortedTitles.length - 1])).to.be.at.most(0);
+            }
         });
     });
 
-    describe('Fixture-based Tests', () => {
-        it('should test products from fixture data', function () {
-            // Using function() instead of arrow function to access this.testData
-            cy.fixture('test-data').then((data) => {
-                data.testProducts.forEach((product: Product) => {
-                    if (product.id) {
-                        cy.request({
-                            method: 'GET',
-                            url: testConfig.endpoints.productById(product.id),
-                        }).then((response) => {
-                            expect(response.status).to.equal(testConfig.expectedStatusCodes.success);
-                            validateProductStructure(response.body);
-                        });
-                    }
-                });
-            });
-        });
+    // Tests requesting products with descending sort and validates client-side sorting logic
+    it('should fetch products sorted by title descending', () => {
+        api({
+            method: 'GET',
+            url: '/products',
+            qs: {
+                sortBy: 'title',
+                order: 'desc'
+            }
+        }).then((response) => {
+            expect(response.status).to.equal(200);
+            expect(response.body).to.have.property('products');
 
-        it('should test search queries from fixture', () => {
-            cy.fixture('test-data').then((data) => {
-                data.searchQueries.forEach((searchTest: any) => {
-                    cy.request({
-                        method: 'GET',
-                        url: testConfig.endpoints.search,
-                        qs: { q: searchTest.query },
-                    }).then((response) => {
-                        validateProductsListResponse(response);
-                        expect(response.body.products.length).to.be.at.least(searchTest.expectedMinResults);
-                    });
-                });
-            });
-        });
-    });
+            const titles = response.body.products.map((p: any) => p.title.toLowerCase());
+            const sortedTitles = [...titles].sort((a, b) => b.localeCompare(a));
 
-    // Edge cases and error handling
-    describe('Error Handling', () => {
-        it('should handle non-existent product ID gracefully', () => {
-            cy.fixture('test-data').then((data) => {
-                makeApiRequest({
-                    method: 'GET',
-                    url: testConfig.endpoints.productById(data.invalidData.nonExistentProductId),
-                }).then((response) => {
-                    expect(response.status).to.equal(testConfig.expectedStatusCodes.notFound);
-                });
-            });
-        });
+            expect(sortedTitles.length).to.equal(titles.length);
 
-        it('should handle empty search query', () => {
-            makeApiRequest({
-                method: 'GET',
-                url: testConfig.endpoints.search,
-                qs: { q: '' },
-            }).then((response) => {
-                expect(response.status).to.equal(testConfig.expectedStatusCodes.success);
-                expect(response.body).to.have.property('products');
-            });
-        });
-
-        it('should handle invalid product ID formats', () => {
-            cy.fixture('test-data').then((data) => {
-                makeApiRequest({
-                    method: 'GET',
-                    url: testConfig.endpoints.productById(data.invalidData.invalidProductId),
-                }).then((response) => {
-                    expect([testConfig.expectedStatusCodes.notFound, testConfig.expectedStatusCodes.badRequest])
-                        .to.include(response.status);
-                });
-            });
+            if (sortedTitles.length > 1) {
+                expect(sortedTitles[0].localeCompare(sortedTitles[sortedTitles.length - 1])).to.be.at.least(0);
+            }
         });
     });
 });

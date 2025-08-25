@@ -5,10 +5,5 @@
     "cypress": "^15.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
-  },
-  "scripts": {
-    "cy:open": "cypress open",
-    "cy:run": "cypress run",
-    "cy:run:headless": "cypress run --headless"
   }
 }

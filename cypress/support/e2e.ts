@@ -1,11 +1,7 @@
+/// <reference types="cypress" />
 
+// Import commands.js using ES2015 syntax
 import './commands';
 
-// Add global type declarations if needed
-declare global {
-    namespace Cypress {
-        interface Chainable {
-            // Add any custom commands here
-        }
-    }
-}
+// Alternatively you can use CommonJS syntax:
+// require('./commands');
