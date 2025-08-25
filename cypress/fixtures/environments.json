@@ -1,0 +1,17 @@
+{
+  "development": {
+    "baseUrl": "https://dummyjson.com",
+    "timeout": 10000,
+    "retries": 2
+  },
+  "staging": {
+    "baseUrl": "https://staging-api.example.com",
+    "timeout": 15000,
+    "retries": 3
+  },
+  "production": {
+    "baseUrl": "https://api.example.com",
+    "timeout": 20000,
+    "retries": 1
+  }
+}

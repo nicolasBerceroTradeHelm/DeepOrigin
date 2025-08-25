@@ -1,0 +1,42 @@
+{
+  "testProducts": [
+    {
+      "id": 1,
+      "title": "Test Product 1",
+      "price": 19.99,
+      "description": "First test product for Cypress testing",
+      "category": "electronics"
+    },
+    {
+      "id": 2,
+      "title": "Test Product 2",
+      "price": 29.99,
+      "description": "Second test product for Cypress testing",
+      "category": "clothing"
+    }
+  ],
+  "searchQueries": [
+    {
+      "query": "phone",
+      "expectedMinResults": 1
+    },
+    {
+      "query": "laptop",
+      "expectedMinResults": 1
+    },
+    {
+      "query": "watch",
+      "expectedMinResults": 0
+    }
+  ],
+  "invalidData": {
+    "nonExistentProductId": 99999,
+    "invalidProductId": -1,
+    "emptyString": "",
+    "malformedProduct": {
+      "title": "",
+      "price": "invalid",
+      "description": null
+    }
+  }
+}

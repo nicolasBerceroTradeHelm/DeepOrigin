@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+
+    // Environment Settings
+    // See also https://aka.ms/tsconfig/module
+    "module": "esnext",
+    "target": "esnext",
+    "moduleResolution": "node",
+    "types": ["cypress", "node"],
+    "lib": ["esnext", "dom"],
+  
+
+    // Other Outputs
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+
+    // Stricter Typechecking Options
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+
+    "strict": true,
+    "jsx": "react-jsx",
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true
+  }
+}
